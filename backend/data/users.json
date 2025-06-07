@@ -1,0 +1,10 @@
+[
+  {
+    "email": "student1@example.com",
+    "courseId": "dsa-course"
+  },
+  {
+    "email": "student2@example.com",
+    "courseId": "python-course"
+  }
+]
