@@ -1,5 +1,4 @@
-import { useState } from "react";
-console.log("✅ Web Dev page loaded");
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Footer from "@/components/footer";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -7,8 +6,44 @@ import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper/modules";
 import { useNavigate } from "react-router-dom";
+import { checkAccess } from "@/api/checkAccess";
+import { getAuth } from "firebase/auth";
 
 export default function WebDevelopmentCoursePage() {
+  const navigate = useNavigate();
+
+  // Loading state to disable buttons while checking
+  const [loading, setLoading] = useState(false);
+
+  const handleEnrollClick = async () => {
+    setLoading(true);
+    const auth = getAuth();
+    const userEmail = auth.currentUser?.email;
+
+    if (!userEmail) {
+      alert("Please log in first to enroll.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const courseId = "web-development-course"; // apna unique course id yahan rakho
+      const result = await checkAccess(userEmail, courseId);
+
+      if (result.accessGranted) {
+        alert("You already have access to this course! Redirecting to course content...");
+        navigate("/course/web-development"); // apne route ke hisab se update karo
+      } else {
+        alert("You don't have access yet. Redirecting to payment page...");
+        window.open("https://payments.cashfree.com/forms/courseova-upi", "_blank");
+      }
+    } catch (error) {
+      console.error("Error checking access:", error);
+      alert("Something went wrong. Please try again later.");
+    }
+    setLoading(false);
+  };
+
   return (
     <>
       {/* Hero Section */}
@@ -34,14 +69,17 @@ export default function WebDevelopmentCoursePage() {
             <p className="text-md text-gray-800 mb-6">
               💼 Start coding today and bring your web development dreams to life! 🚀💡
             </p>
-            <Button size="lg" className="text-lg px-6 py-4 shadow-xl hover:scale-105 transition-transform">
-              <a href="https://payments.cashfree.com/forms/courseova-upi" target="_blank" rel="noopener noreferrer">
-                👉 Enroll Now At Just ₹199/- Only
-              </a>
+            <Button
+              size="lg"
+              className="text-lg px-6 py-4 shadow-xl hover:scale-105 transition-transform"
+              onClick={handleEnrollClick}
+              disabled={loading}
+            >
+              {loading ? "Checking Access..." : "👉 Enroll Now At Just ₹199/- Only"}
             </Button>
           </div>
           <div className="flex justify-center">
-           <img
+            <img
               src="/images/web.png"
               alt="Web Dev Course"
               className="w-full max-w-[300px] md:max-w-[400px] lg:max-w-[500px] rounded-xl mx-auto"
@@ -103,12 +141,21 @@ export default function WebDevelopmentCoursePage() {
             Download our complete roadmap PDF to learn about all the topics covered in this course.
           </h3>
           <div className="flex justify-center flex-wrap gap-4">
-            <a href="https://drive.google.com/file/d/1awvdnSMlgQaSi0cmrKIhlis67jwrfDA2/view?usp=sharing" download className="bg-primary text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-primary/90 transition">
+            <a
+              href="https://drive.google.com/file/d/1awvdnSMlgQaSi0cmrKIhlis67jwrfDA2/view?usp=sharing"
+              download
+              className="bg-primary text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-primary/90 transition"
+            >
               📥 Download Roadmap PDF
             </a>
-            <a href="https://payments.cashfree.com/forms?code=courseova-upi" target="_blank" rel="noopener noreferrer" className="bg-purple-700 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-purple-800 transition">
-              💳 Enroll Now At Just 199/- Only
-            </a>
+            {/* Second Enroll Now Button with same behavior */}
+            <Button
+              onClick={handleEnrollClick}
+              disabled={loading}
+              className="bg-purple-700 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-purple-800 transition"
+            >
+              {loading ? "Checking Access..." : "💳 Enroll Now At Just 199/- Only"}
+            </Button>
           </div>
         </div>
       </section>
@@ -137,7 +184,6 @@ export default function WebDevelopmentCoursePage() {
           <div className="text-lg space-y-4 text-gray-800">
             <p>📱 <strong>+91 92573 72495</strong></p>
             <p>📧 <strong>couseova45@gmail.com</strong></p>
-            {/* <p>📷 <strong>Courseova</strong></p> */}
           </div>
         </div>
       </section>
@@ -159,76 +205,73 @@ export default function WebDevelopmentCoursePage() {
         </div>
       </section>
 
-{/* 👇 Centered content below */}
-<div className="max-w-3xl mx-auto text-center mt-8 px-4">
-  <p className="text-base leading-6 text-gray-800 font-medium">
-    Get access to high-quality handwritten MERN stack notes designed to boost your learning and help you crack interviews with confidence!
-  </p>
-</div>
+      {/* Centered text below */}
+      <div className="max-w-3xl mx-auto text-center mt-8 px-4">
+        <p className="text-base leading-6 text-gray-800 font-medium">
+          Get access to high-quality handwritten MERN stack notes designed to boost your learning and help you crack interviews with confidence!
+        </p>
+      </div>
 
-
-
-
+      {/* Student Reviews Section */}
       <section className="py-20 px-6 md:px-12 lg:px-24 bg-white">
-  <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
-    Hear From Our Students 👩‍💻👨‍💻
-  </h2>
+        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          Hear From Our Students 👩‍💻👨‍💻
+        </h2>
 
-  <Swiper
-    slidesPerView={1}
-    spaceBetween={30}
-    grabCursor={true}
-    pagination={{ clickable: true }}
-    breakpoints={{
-      768: { slidesPerView: 2 },
-      1024: { slidesPerView: 3 },
-    }}
-    modules={[Pagination]}
-    className="w-full max-w-6xl mx-auto pb-12"
-  >
-    {[
-      {
-        name: "Aditi Sharma",
-        review:
-          "This course is simply amazing! The roadmap is clear, and the explanations are beginner-friendly yet detailed. Loved it!",
-      },
-      {
-        name: "Ravi Mehta",
-        review:
-          "The best MERN stack course. Real projects, lifetime access, and super affordable. Thank you team!",
-      },
-      {
-        name: "Sakshi Patel",
-        review:
-          "Explains concepts with such simplicity. Notes + projects + roadmap = Perfect combo. Highly recommended!",
-      },
-      {
-        name: "Mohit Saini",
-        review:
-          "Quality content at budget price. Smooth teaching and great community support. 5 stars!",
-      },
-    ].map((student, index) => (
-      <SwiperSlide key={index}>
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg h-full transition hover:shadow-xl">
-          <div className="text-lg font-semibold text-gray-900 mb-2">
-            {student.name}
-          </div>
-          <p className="text-gray-600 text-sm leading-relaxed">{student.review}</p>
-        </div>
-      </SwiperSlide>
-    ))}
-  </Swiper>
+        <Swiper
+          slidesPerView={1}
+          spaceBetween={30}
+          grabCursor={true}
+          pagination={{ clickable: true }}
+          breakpoints={{
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+          }}
+          modules={[Pagination]}
+          className="w-full max-w-6xl mx-auto pb-12"
+        >
+          {[
+            {
+              name: "Aditi Sharma",
+              review:
+                "This course is simply amazing! The roadmap is clear, and the explanations are beginner-friendly yet detailed. Loved it!",
+            },
+            {
+              name: "Ravi Mehta",
+              review:
+                "The best MERN stack course. Real projects, lifetime access, and super affordable. Thank you team!",
+            },
+            {
+              name: "Sakshi Patel",
+              review:
+                "Explains concepts with such simplicity. Notes + projects + roadmap = Perfect combo. Highly recommended!",
+            },
+            {
+              name: "Mohit Saini",
+              review:
+                "Quality content at budget price. Smooth teaching and great community support. 5 stars!",
+            },
+          ].map((student, index) => (
+            <SwiperSlide key={index}>
+              <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-lg h-full transition hover:shadow-xl">
+                <div className="text-lg font-semibold text-gray-900 mb-2">
+                  {student.name}
+                </div>
+                <p className="text-gray-600 text-sm leading-relaxed">{student.review}</p>
+              </div>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-  <style>
-    {`
-      .swiper-pagination {
-        bottom: 0 !important;
-        margin-top: 20px;
-      }
-    `}
-  </style>
-</section>
-
+        <style>
+          {`
+            .swiper-pagination {
+              bottom: 0 !important;
+              margin-top: 20px;
+            }
+          `}
+        </style>
+      </section>
 
       <Footer />
     </>
