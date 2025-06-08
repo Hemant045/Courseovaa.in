@@ -37,6 +37,7 @@ import RefundPolicy from './pages/RefundPolicy';
 import TermsAndConditions from './pages/TermsAndConditions';
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Logout from "./pages/Logout";
+import MyStorePage from "./pages/MyStorePage"; 
 
 function PageWrapper() {
   const { isMenuOpen } = useMenuContext();
@@ -86,6 +87,7 @@ function PageWrapper() {
         <Route path="/notes/demo-note/:topic" element={<NoteDetail />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/logout" element={<Logout />} />
+        <Route path="/my-store" element={<MyStorePage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

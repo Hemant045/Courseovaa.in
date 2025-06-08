@@ -132,6 +132,8 @@ export default function Navbar() {
             </NavigationMenuList>
           </NavigationMenu>
 
+          <Link to="/my-store" className="hover:underline text-blue-600">My Store</Link>
+
           {/* Button to Full Course Listing Page */}
           <Link to="/courses">
             <Button variant="outline" className="ml-4">Explore All Courses</Button>

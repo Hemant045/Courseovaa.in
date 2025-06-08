@@ -1,56 +1,37 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 const app = express();
 
 app.use(cors());
-app.use(express.json()); // Yeh zaroori hai webhook data read karne ke liye
+app.use(express.json());
 
-// Dummy in-memory "database"
-const purchasedCourses = [
+let purchasedCourses = [
   { email: "student1@example.com", courseId: "dsa-course" },
-  { email: "student2@example.com", courseId: "web-dev" }
+  { email: "student2@example.com", courseId: "web-dev" },
 ];
 
-// ✅ Access check endpoint for frontend
-app.post('/api/check-access', (req, res) => {
-  const { email, courseId } = req.body;
+// ✅ Webhook: Add purchase entry
+app.post("/api/webhook", (req, res) => {
+  const { txStatus, customerEmail, orderId } = req.body;
 
-  const found = purchasedCourses.find(
-    (entry) => entry.email === email && entry.courseId === courseId
-  );
-
-  if (found) {
-    return res.json({ accessGranted: true });
-  } else {
-    return res.json({ accessGranted: false });
-  }
-});
-
-// ✅ Webhook endpoint for Cashfree (to store successful purchase)
-app.post('/api/webhook', (req, res) => {
-  const event = req.body;
-  console.log("📩 Webhook Received:", event);
-
-  if (event.txStatus === "SUCCESS") {
-    const email = event.customerEmail;
-    const courseId = event.orderId;
-
-    const alreadyPurchased = purchasedCourses.find(
-      (entry) => entry.email === email && entry.courseId === courseId
-    );
-
-    if (!alreadyPurchased) {
-      purchasedCourses.push({ email, courseId });
-      console.log(`✅ Purchase added for ${email} - ${courseId} via webhook`);
-    }
-
-    return res.status(200).json({ success: true });
+  if (txStatus === "SUCCESS") {
+    purchasedCourses.push({ email: customerEmail, courseId: orderId });
+    console.log("✅ Purchase stored:", customerEmail, orderId);
+    return res.json({ message: "Purchase stored" });
   }
 
-  return res.status(200).json({ access: false }); // fail case
+  res.status(400).json({ message: "Invalid transaction" });
 });
 
-const PORT = process.env.PORT || 5000;
+// ✅ User Purchase Check
+app.post("/api/user-purchases", (req, res) => {
+  const { email } = req.body;
+
+  const userCourses = purchasedCourses.filter(item => item.email === email);
+  return res.json({ purchases: userCourses });
+});
+
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
